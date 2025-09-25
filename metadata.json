@@ -1,0 +1,5 @@
+{
+  "name": "AI Image Montage Creator",
+  "description": "An AI-powered application using the Gemini API (NanoBanana model) to seamlessly blend a character image with a product image, creating a realistic photo montage.",
+  "requestFramePermissions": []
+}
