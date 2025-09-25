@@ -1,12 +1,18 @@
-import React, { useState, useCallback } from 'react';
+
+import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import ResultDisplay from './components/ResultDisplay';
 import ProductAlbum from './components/ProductAlbum';
+import Auth from './components/Auth';
 import type { ImageData, ResultData, AlbumState } from './types';
 import { generateMontage } from './services/geminiService';
 
 const App: React.FC = () => {
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(() => {
+    return localStorage.getItem('currentUserEmail');
+  });
+
   const [characterImage, setCharacterImage] = useState<ImageData | null>(null);
   const [productImage, setProductImage] = useState<ImageData | null>(null);
   const [prompt, setPrompt] = useState<string>('');
@@ -15,6 +21,45 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (currentUserEmail) {
+      const savedAlbum = localStorage.getItem(`albumState_${currentUserEmail}`);
+      if (savedAlbum) {
+        setProductAlbum(JSON.parse(savedAlbum));
+      } else {
+        setProductAlbum({ rootImages: [], folders: [] });
+      }
+    }
+  }, [currentUserEmail]);
+
+  useEffect(() => {
+    if (currentUserEmail) {
+      localStorage.setItem(`albumState_${currentUserEmail}`, JSON.stringify(productAlbum));
+    }
+  }, [productAlbum, currentUserEmail]);
+
+  const handleLogin = (email: string) => {
+    localStorage.setItem('currentUserEmail', email);
+    setCurrentUserEmail(email);
+  };
+
+  const handleSignup = (email: string) => {
+    localStorage.setItem('currentUserEmail', email);
+    setCurrentUserEmail(email);
+    setProductAlbum({ rootImages: [], folders: [] });
+  };
+  
+  const handleLogout = () => {
+    localStorage.removeItem('currentUserEmail');
+    setCurrentUserEmail(null);
+    setCharacterImage(null);
+    setProductImage(null);
+    setPrompt('');
+    setProductAlbum({ rootImages: [], folders: [] });
+    setResult(null);
+    setError(null);
+  };
+
   const handleProductImageUpload = (imageData: Omit<ImageData, 'id'> | null) => {
     if (imageData) {
       const newImage: ImageData = {
@@ -22,7 +67,6 @@ const App: React.FC = () => {
         id: `${Date.now()}-${Math.random()}` 
       };
       setProductImage(newImage);
-      // Add to album root if it's a new image
       if (!productAlbum.rootImages.some(img => img.base64 === newImage.base64) && !productAlbum.folders.some(f => f.images.some(img => img.base64 === newImage.base64))) {
          setProductAlbum(prevAlbum => ({
             ...prevAlbum,
@@ -68,7 +112,6 @@ const App: React.FC = () => {
     setProductAlbum(prev => {
         const folderToDelete = prev.folders.find(f => f.id === folderId);
         if (!folderToDelete) return prev;
-        // Move images from folder back to root
         const newRootImages = [...prev.rootImages, ...folderToDelete.images];
         const newFolders = prev.folders.filter(f => f.id !== folderId);
         return { folders: newFolders, rootImages: newRootImages };
@@ -119,7 +162,6 @@ const App: React.FC = () => {
     });
   };
 
-
   const handleGenerateClick = useCallback(async () => {
     if (!characterImage || !productImage) {
       setError('Vui lòng tải lên cả ảnh nhân vật và ảnh sản phẩm.');
@@ -140,9 +182,13 @@ const App: React.FC = () => {
     }
   }, [characterImage, productImage, prompt]);
 
+  if (!currentUserEmail) {
+    return <Auth onLogin={handleLogin} onSignup={handleSignup} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white font-sans">
-      <Header />
+      <Header userEmail={currentUserEmail} onLogout={handleLogout} />
       <main className="container mx-auto p-4 md:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
