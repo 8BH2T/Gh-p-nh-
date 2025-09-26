@@ -17,16 +17,16 @@ export const generateMontage = async (
     const model = 'gemini-2.5-flash-image-preview';
 
     const prompt = `
-      Nhiệm vụ: Tạo một bức ảnh ghép chân thực bằng cách kết hợp hai hình ảnh được cung cấp.
-      - Hình ảnh 1: Một nhân vật.
-      - Hình ảnh 2: Một sản phẩm.
-      Yêu cầu:
-      1. Tạo ra một hình ảnh mới, trong đó nhân vật đang sử dụng hoặc tương tác tự nhiên với sản phẩm.
-      2. Đảm bảo tỷ lệ giữa nhân vật và sản phẩm là chính xác và hợp lý.
-      3. Điều chỉnh ánh sáng, bóng đổ và phối cảnh để hình ảnh trông liền mạch và chân thực.
-      4. Giữ nguyên phong cách và các chi tiết của nhân vật và sản phẩm gốc.
-      5. Yêu cầu bổ sung từ người dùng: "${customPrompt}"
-      Kết quả cuối cùng phải là một bức ảnh chất lượng cao và trông như được chụp thật.
+      Nhiệm vụ: Tạo một bức ảnh ghép chân thực, trong đó nhân vật từ Hình ảnh 1 đang mặc sản phẩm từ Hình ảnh 2.
+      - Hình ảnh 1: Một nhân vật (người mẫu).
+      - Hình ảnh 2: Một sản phẩm quần áo hoặc phụ kiện.
+      Yêu cầu chính:
+      1. **Mặc đồ**: Chỉnh sửa hình ảnh để nhân vật mặc sản phẩm một cách tự nhiên, vừa vặn như thể nó được làm riêng cho họ.
+      2. **Chân thực**: Giữ nguyên các đặc điểm của nhân vật (khuôn mặt, vóc dáng, màu da). Điều chỉnh ánh sáng, bóng đổ, và các nếp gấp của vải để sản phẩm hòa hợp hoàn hảo với cơ thể nhân vật và môi trường xung quanh.
+      3. **Giữ chi tiết**: Giữ nguyên tất cả các chi tiết, màu sắc và họa tiết của sản phẩm.
+      4. **Yêu cầu thêm**: Nếu có, hãy kết hợp yêu cầu sau từ người dùng: "${customPrompt}"
+      
+      Đầu ra: Một bức ảnh chất lượng cao, nhân vật trong ảnh xuất hiện một cách tự nhiên khi mặc sản phẩm đã tải lên.
     `.trim();
 
     const response = await ai.models.generateContent({
